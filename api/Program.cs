@@ -1,4 +1,5 @@
 using coding_challenge.Services;
+using System.Threading.RateLimiting;
 
 namespace coding_challenge
 {
@@ -24,6 +25,20 @@ namespace coding_challenge
                         policy.AllowAnyMethod();
                     });
             });
+
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+                        factory: partition => new FixedWindowRateLimiterOptions
+                        {
+                            AutoReplenishment = true,
+                            PermitLimit = 20,
+                            QueueLimit = 0,
+                            Window = TimeSpan.FromMinutes(1)
+                        }));
+            });
             // Register our mock service
             builder.Services.AddSingleton<MockTaskService>();
 
@@ -41,7 +56,9 @@ namespace coding_challenge
             app.UseCors();
             app.UseAuthorization();
 
+            app.UseRouting();
 
+            app.UseRateLimiter();
             app.MapControllers();
 
             app.Run();

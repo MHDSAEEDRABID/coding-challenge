@@ -4,13 +4,12 @@ import { Task } from 'src/models/task.model';
 import { TaskService } from 'src/services/task.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  providers: [TaskService]
+  selector: 'app-list',
+  templateUrl: './list.component.html',
+  styleUrls: ['./list.component.scss']
 })
-export class AppComponent implements OnInit {
-  tasks : Task[] = [];
+export class ListComponent implements OnInit {
+tasks : Task[] = [];
   router = inject(Router);
   constructor(private taskService : TaskService) {
   
@@ -23,5 +22,10 @@ export class AppComponent implements OnInit {
   displayedColumns: string[] = ['id', 'title','description', 'createdAt', 'dueDate'];
   goToDetails(row : Task) {
     this.router.navigate(['/details', row.id]);
+  }
+  
+  isOverdue(row: Task): boolean {
+    // assuming row.dueDate is a Date (or ISO‑string convertible to Date)
+    return !!row.dueDate && new Date(row.dueDate) < new Date();
   }
 }

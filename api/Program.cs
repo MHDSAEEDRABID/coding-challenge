@@ -14,7 +14,16 @@ namespace coding_challenge
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    policy =>
+                    {
+                        policy.AllowAnyHeader();
+                        policy.AllowAnyOrigin(); // replace it with the origin of production envioment
+                        policy.AllowAnyMethod();
+                    });
+            });
             // Register our mock service
             builder.Services.AddSingleton<MockTaskService>();
 
@@ -29,6 +38,7 @@ namespace coding_challenge
 
             app.UseHttpsRedirection();
 
+            app.UseCors();
             app.UseAuthorization();
 
 
